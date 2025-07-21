@@ -50,10 +50,17 @@ def markDetections(detections,frame,frameWidth,frameHeight):
         if confidence > 0.5:
             box = detections[0,0,i,3:7]*[frameWidth,frameHeight,frameWidth,frameHeight]
             x1, y1, x2, y2 = box.astype("int")
+            x1, y1, x2, y2 = x1-10, y1-10, x2+10, y2+10
             cv.rectangle(frame,(x1, y1),(x2, y2) ,(0,0,0),3)
             cropped=frame[x1:x2,y1:y2]
-            verification = DeepFace.verify(img1_path = "image.png", img2_path = frame, enforce_detection = False , model_name = "VGG-Face")
-            print(verification)
+            verification = DeepFace.verify(img1_path = "image.png", img2_path = cropped, enforce_detection = False , model_name = "ArcFace")
+            distance = verification['distance']
+            threshold = 0.68
+
+            if distance < threshold:
+                print(True)
+            else:
+                print(False)
             return frame
         print("no face")
         return frame
@@ -76,6 +83,8 @@ def startFrames():
 
         
         cv.imshow("frames",frame)
+
+        time.sleep(1)
         
 
 def main():
