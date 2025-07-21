@@ -1,5 +1,13 @@
 import time
 import cv2 as cv
+from deepface import DeepFace
+
+
+#TypeError: recognize() missing 1 required positional argument: 'frame'
+
+#vars
+face = "image.png"
+
 
 #dnn detection model init
 modelFile = "res10_300x300_ssd_iter_140000_fp16.caffemodel"
@@ -28,6 +36,8 @@ class InterruptedException(Exception):
 
 
 #functions
+
+
 def detectFaces(img):
     blob=cv.dnn.blobFromImage(img,1,model_res,model_meanSubValues)
     model.setInput(blob)
@@ -41,11 +51,13 @@ def markDetections(detections,frame,frameWidth,frameHeight):
             box = detections[0,0,i,3:7]*[frameWidth,frameHeight,frameWidth,frameHeight]
             x1, y1, x2, y2 = box.astype("int")
             cv.rectangle(frame,(x1, y1),(x2, y2) ,(0,0,0),3)
-            print(x1,x2,y1,y2)
-            return frame[y1:y2,x1:x2]
+            cropped=frame[x1:x2,y1:y2]
+            verification = DeepFace.verify(img1_path = "image.png", img2_path = frame, enforce_detection = False , model_name = "VGG-Face")
+            print(verification)
+            return frame
+        print("no face")
         return frame
         
-
 def startFrames():
     while True:
         OK , frame = cam.read()
@@ -60,21 +72,20 @@ def startFrames():
 
         detections = detectFaces(frame)
 
-   
-
         frame = markDetections(detections=detections,frame=frame,frameWidth=width,frameHeight=height)
 
+        
         cv.imshow("frames",frame)
         
-
-
-
 
 def main():
     try:
         startFrames()
     except (NoFrameException , InterruptedException) as e:
         print(e)
+
+def main2():
+    pass
 
 if __name__=="__main__":
     main()
